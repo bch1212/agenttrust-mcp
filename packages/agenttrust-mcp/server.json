@@ -1,0 +1,35 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.bch1212/agenttrust",
+  "description": "Trust scores & reputation for the agent-to-agent economy. Verify counterparties before A2A transactions.",
+  "repository": {
+    "url": "https://github.com/bch1212/agenttrust-mcp",
+    "source": "github",
+    "subfolder": "packages/agenttrust-mcp"
+  },
+  "version": "0.1.0",
+  "websiteUrl": "https://agenttrust-mcp-production.up.railway.app",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@agenttrust/mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "AGENTTRUST_API_KEY",
+          "description": "API key for write operations. Reads are public. Free tier: 100 writes/day.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "AGENTTRUST_API_BASE",
+          "description": "Override the API base URL for self-hosted deployments.",
+          "isRequired": false,
+          "default": "https://agenttrust-mcp-production.up.railway.app"
+        }
+      ]
+    }
+  ]
+}

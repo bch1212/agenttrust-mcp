@@ -1,0 +1,53 @@
+{
+  "name": "@agenttrust/mcp",
+  "version": "0.1.0",
+  "description": "MCP server for AgentTrust — trust scores & reputation for the agent-to-agent economy.",
+  "mcpName": "io.github.bch1212/agenttrust",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "agenttrust-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && chmod +x dist/index.js",
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "agent-trust",
+    "reputation",
+    "a2a",
+    "claude",
+    "agent",
+    "trust-score"
+  ],
+  "homepage": "https://github.com/bch1212/agenttrust-mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bch1212/agenttrust-mcp.git",
+    "directory": "packages/agenttrust-mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/bch1212/agenttrust-mcp/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
