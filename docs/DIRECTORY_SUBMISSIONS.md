@@ -6,7 +6,7 @@
 - **awesome-mcp-servers**: PR open at https://github.com/punkpeye/awesome-mcp-servers/pull/6117
 
 ## Pending on npm publish
-Once `@agenttrust/mcp` lands on npm (workflow ready, needs NPM_TOKEN secret):
+Once `agenttrust-mcp` lands on npm (workflow ready, needs NPM_TOKEN secret):
 - **Anthropic MCP Registry** auto-publishes via `.github/workflows/publish-mcp.yml` (OIDC + server.json submission)
 - **Smithery** auto-imports from npm packages with the `mcp-server` keyword
 - **Glama** auto-imports from packages tagged `model-context-protocol`

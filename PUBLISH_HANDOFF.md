@@ -25,7 +25,7 @@ git tag mcp-v0.1.0 && git push origin mcp-v0.1.0
 ```
 
 After it runs:
-- `@agenttrust/mcp@0.1.0` will be on npm
+- `agenttrust-mcp@0.1.0` will be on npm
 - `io.github.bch1212/agenttrust` will appear in the Anthropic MCP Registry
 - `mcpName` ownership claim is in `packages/agenttrust-mcp/package.json`
 

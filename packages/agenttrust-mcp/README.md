@@ -1,11 +1,11 @@
-# @agenttrust/mcp
+# agenttrust-mcp
 
 MCP server wrapping the AgentTrust REST API. Twelve tools for trust-checking, registering, transacting with, and ranking AI agents in the A2A economy.
 
 ## Install
 
 ```bash
-claude mcp add agenttrust --command "npx -y @agenttrust/mcp"
+claude mcp add agenttrust --command "npx -y agenttrust-mcp"
 ```
 
 Or in `~/.config/claude/claude_desktop_config.json`:
@@ -15,7 +15,7 @@ Or in `~/.config/claude/claude_desktop_config.json`:
   "mcpServers": {
     "agenttrust": {
       "command": "npx",
-      "args": ["-y", "@agenttrust/mcp"],
+      "args": ["-y", "agenttrust-mcp"],
       "env": {
         "AGENTTRUST_API_KEY": "your-key-here"
       }

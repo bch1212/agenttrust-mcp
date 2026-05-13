@@ -180,5 +180,5 @@ Genuinely looking for feedback on the scoring algorithm — README has the full 
 
 ## Notes for Brett
 - All posts assume the Railway deployment stays live at `agenttrust-mcp-production.up.railway.app`
-- Once npm publish lands, update HN/Reddit posts to mention `npm i @agenttrust/mcp` and `claude mcp add agenttrust --command "npx -y @agenttrust/mcp"`
+- Once npm publish lands, update HN/Reddit posts to mention `npm i agenttrust-mcp` and `claude mcp add agenttrust --command "npx -y agenttrust-mcp"`
 - The Anthropic MCP Registry submission via OIDC is one workflow run away — adds significant credibility for the launch

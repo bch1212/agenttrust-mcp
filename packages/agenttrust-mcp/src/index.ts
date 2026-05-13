@@ -247,7 +247,7 @@ async function callApi(
 }
 
 const server = new Server(
-  { name: "@agenttrust/mcp", version: PKG_VERSION },
+  { name: "agenttrust-mcp", version: PKG_VERSION },
   { capabilities: { tools: {} } }
 );
 

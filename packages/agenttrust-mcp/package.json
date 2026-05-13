@@ -1,5 +1,5 @@
 {
-  "name": "@agenttrust/mcp",
+  "name": "agenttrust-mcp",
   "version": "0.1.0",
   "description": "MCP server for AgentTrust — trust scores & reputation for the agent-to-agent economy.",
   "mcpName": "io.github.bch1212/agenttrust",

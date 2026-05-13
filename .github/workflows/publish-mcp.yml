@@ -1,4 +1,4 @@
-name: Publish @agenttrust/mcp
+name: Publish agenttrust-mcp
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
       - name: Wait for npm to index the new version
         run: |
           for i in $(seq 1 12); do
-            ver=$(curl -sS "https://registry.npmjs.org/@agenttrust/mcp" | jq -r '."dist-tags".latest // empty')
+            ver=$(curl -sS "https://registry.npmjs.org/agenttrust-mcp" | jq -r '."dist-tags".latest // empty')
             if [ -n "$ver" ]; then
               echo "npm latest: $ver"
               exit 0
@@ -80,7 +80,7 @@ jobs:
             -d @server.json)
           echo "publish resp: $resp"
           if echo "$resp" | grep -qiE '"status":\s*[45]'; then
-            if echo "$resp" | grep -qi "already"; then
+            if echo "$resp" | grep -qiE "already|duplicate"; then
               echo "Already published — idempotent, ok"; exit 0
             fi
             exit 1
