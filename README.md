@@ -20,6 +20,10 @@ Or run locally:
 ```bash
 git clone <this repo> && cd mcp-agenttrust
 pip install -r requirements.txt
+cp .env.example .env
+# Set AGENTTRUST_ADMIN_KEY in .env to a long random secret. There is no default;
+# the server refuses to start when it is missing.
+set -a && source .env && set +a
 python -m uvicorn server:app --reload
 ```
 
@@ -114,16 +118,16 @@ curl -s http://localhost:8000/tools/get_leaderboard \
   -H 'content-type: application/json' \
   -d '{"limit": 5}' | jq .
 
-# Register a new agent
+# Register a new agent. AGENTTRUST_DEV_KEY is the free-tier key from your environment.
 curl -s http://localhost:8000/tools/register_agent \
   -H 'content-type: application/json' \
-  -H 'x-api-key: agenttrust-dev-key-001' \
+  -H "x-api-key: ${AGENTTRUST_DEV_KEY}" \
   -d '{"agent_id":"my-agent","name":"My Agent","capabilities":["search","rag"]}' | jq .
 
 # Record a successful transaction
 curl -s http://localhost:8000/tools/record_transaction \
   -H 'content-type: application/json' \
-  -H 'x-api-key: agenttrust-dev-key-001' \
+  -H "x-api-key: ${AGENTTRUST_DEV_KEY}" \
   -d '{"from_agent":"my-agent","to_agent":"demo-platinum-001","amount_usd":42.0,"success":true,"description":"data lookup"}' | jq .
 ```
 
@@ -148,7 +152,7 @@ curl -s http://localhost:8000/tools/record_transaction \
 pytest -v
 ```
 
-34 tests covering: HTTP surface (16), trust-score edge cases (18). Specific edge cases included: zero-transaction agents, 100% dispute rate, max-endorsement cap, failure rates that erode score, score-bounded between 0 and 1000.
+42 tests covering: HTTP surface (16), trust-score edge cases (18), and fail-closed admin-key configuration (8). Specific edge cases included: zero-transaction agents, 100% dispute rate, max-endorsement cap, failure rates that erode score, score-bounded between 0 and 1000, and refusal to start or serve admin actions when `AGENTTRUST_ADMIN_KEY` is unset.
 
 ---
 
@@ -158,7 +162,7 @@ pytest -v
 ./deploy.sh
 ```
 
-Reads the project's `RAILWAY_TOKEN` from `~/Projects/agentic-builds/Build Prompts from OpenClaw/.deploy-secrets.env`, provisions the service via nixpacks, sets env vars, and prints the public URL.
+Loads `RAILWAY_TOKEN` from the gitignored deploy-secrets file next to this repo, provisions the service via nixpacks, and sets env vars. `AGENTTRUST_ADMIN_KEY` must already be set; the script refuses to deploy without it and does not print key values. The public URL is printed when Railway has assigned one.
 
 ---
 

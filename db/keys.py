@@ -14,14 +14,55 @@ DEFAULT_DAILY_LIMITS = {
     "pro": 10**9,  # effectively unlimited
 }
 
+ADMIN_KEY_ENV = "AGENTTRUST_ADMIN_KEY"
+DEV_KEY_ENV = "AGENTTRUST_DEV_KEY"
+
+
+class AdminKeyNotConfigured(RuntimeError):
+    """AGENTTRUST_ADMIN_KEY is missing or blank.
+
+    Raised so the process refuses to start and admin actions fail closed.
+    The message intentionally contains no key material.
+    """
+
+
+def get_admin_key() -> str:
+    """Return the configured admin key.
+
+    There is no default. A missing or blank AGENTTRUST_ADMIN_KEY raises
+    AdminKeyNotConfigured.
+    """
+    key = (os.environ.get(ADMIN_KEY_ENV) or "").strip()
+    if not key:
+        raise AdminKeyNotConfigured(
+            "AGENTTRUST_ADMIN_KEY is not set. Refusing to start and refusing "
+            "admin actions. Set AGENTTRUST_ADMIN_KEY to a secret value; there "
+            "is no default."
+        )
+    return key
+
+
+def _optional_dev_key() -> Optional[str]:
+    """Dev key is optional. Never fall back to a shared hardcoded key."""
+    key = (os.environ.get(DEV_KEY_ENV) or "").strip()
+    return key or None
+
 
 def seed_default_keys(conn: sqlite3.Connection) -> None:
-    """Insert dev + admin keys idempotently."""
-    dev_key = os.environ.get("AGENTTRUST_DEV_KEY", "agenttrust-dev-key-001")
-    admin_key = os.environ.get("AGENTTRUST_ADMIN_KEY", "agenttrust-admin-key-001")
+    """Insert env-provided keys idempotently.
+
+    AGENTTRUST_ADMIN_KEY is required; this raises AdminKeyNotConfigured when
+    it is missing so startup fails closed. AGENTTRUST_DEV_KEY is seeded only
+    when set. No shared default keys are inserted.
+    """
+    admin_key = get_admin_key()
+    dev_key = _optional_dev_key()
     now = time.time()
+    seeds: list[tuple[str, str]] = [(admin_key, "pro")]
+    if dev_key and dev_key != admin_key:
+        seeds.append((dev_key, "free"))
     with transaction(conn):
-        for key, tier in ((dev_key, "free"), (admin_key, "pro")):
+        for key, tier in seeds:
             existing = conn.execute(
                 "SELECT 1 FROM api_keys WHERE key=?", (key,)
             ).fetchone()
@@ -95,10 +136,15 @@ def check_and_consume(conn: sqlite3.Connection, key: Optional[str]) -> AuthResul
 
 
 def is_admin(conn: sqlite3.Connection, key: Optional[str]) -> bool:
-    """Admin = the AGENTTRUST_ADMIN_KEY (or any 'pro' tier key, for simplicity)."""
+    """Admin = the configured AGENTTRUST_ADMIN_KEY, or any pro-tier key.
+
+    Raises AdminKeyNotConfigured when the env var is missing or blank.
+    Pro-tier keys are not treated as admin until the env var is set, so a
+    missing configuration cannot fall open.
+    """
+    admin_key = get_admin_key()
     if not key:
         return False
-    admin_key = os.environ.get("AGENTTRUST_ADMIN_KEY", "agenttrust-admin-key-001")
     if key == admin_key:
         return True
     row = get_key(conn, key)

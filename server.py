@@ -378,6 +378,19 @@ def _upgrade_response() -> JSONResponse:
     )
 
 
+def _admin_not_configured_response() -> JSONResponse:
+    return JSONResponse(
+        status_code=503,
+        content={
+            "error": "admin_key_not_configured",
+            "detail": (
+                "AGENTTRUST_ADMIN_KEY is not set. Admin actions are disabled. "
+                "There is no default admin key."
+            ),
+        },
+    )
+
+
 def _auth_or_response(tool_name: str, x_api_key: str | None) -> JSONResponse | None:
     """Returns a JSONResponse on failure, or None if auth passes."""
     conn = get_db()
@@ -386,14 +399,26 @@ def _auth_or_response(tool_name: str, x_api_key: str | None) -> JSONResponse | N
     if tool_name not in WRITE_TOOLS:
         return JSONResponse(status_code=404, content={"error": "unknown_tool", "tool": tool_name})
 
+    # Fail closed before consuming quota: admin tools need a configured key.
+    if tool_name in ADMIN_TOOLS:
+        try:
+            keys_mod.get_admin_key()
+        except keys_mod.AdminKeyNotConfigured:
+            return _admin_not_configured_response()
+
     auth = keys_mod.check_and_consume(conn, x_api_key)
     if not auth.ok:
         if auth.reason == "rate_limited":
             return _upgrade_response()
         return JSONResponse(status_code=401, content={"error": auth.reason})
 
-    if tool_name in ADMIN_TOOLS and not keys_mod.is_admin(conn, x_api_key):
-        return JSONResponse(status_code=403, content={"error": "admin_key_required"})
+    if tool_name in ADMIN_TOOLS:
+        try:
+            allowed = keys_mod.is_admin(conn, x_api_key)
+        except keys_mod.AdminKeyNotConfigured:
+            return _admin_not_configured_response()
+        if not allowed:
+            return JSONResponse(status_code=403, content={"error": "admin_key_required"})
     return None
 
 
