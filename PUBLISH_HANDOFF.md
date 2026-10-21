@@ -36,7 +36,11 @@ See `README.md` for the algorithm. Tiers: PLATINUM ≥800, GOLD 550–799, SILVE
 Free read tier (no key); $9/mo Pro tier (unlimited writes); pay-per-call $0.001/write.
 
 ## Saved Production Keys
-- Dev key: `agenttrust-dev-114ee51b9dfe`
-- Admin key: `agenttrust-admin-5586ba510956f99e`
 
-These are also in `.keys.txt` (gitignored). Stored as Railway env vars.
+Production dev and admin keys are not stored in this repository.
+Set `AGENTTRUST_DEV_KEY` and `AGENTTRUST_ADMIN_KEY` only as environment
+variables on the host (for example Railway). Keep any local copy in a
+gitignored file such as `.env` or `.keys.txt`.
+
+If a key was previously committed, rotate it in the host environment.
+The old value is not recorded here.

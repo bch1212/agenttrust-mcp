@@ -8,7 +8,8 @@
 # What it does:
 #   1. Loads RAILWAY_TOKEN from ../.deploy-secrets.env (and exports it as RAILWAY_API_TOKEN).
 #   2. Creates the Railway project + service if missing.
-#   3. Sets AGENTTRUST_DEV_KEY, AGENTTRUST_ADMIN_KEY, AGENTTRUST_UPGRADE_URL.
+#   3. Sets AGENTTRUST_DEV_KEY (if present), AGENTTRUST_ADMIN_KEY, AGENTTRUST_UPGRADE_URL.
+#      Refuses to continue when AGENTTRUST_ADMIN_KEY is unset. Does not print key values.
 #   4. Deploys via nixpacks.
 #   5. Prints the public URL.
 
@@ -48,14 +49,18 @@ if [[ ! -f .railway.json ]] && [[ ! -d .railway ]]; then
   railway init --name "$SERVICE_NAME" || true
 fi
 
-# Pick reasonable defaults for env
-DEV_KEY="${AGENTTRUST_DEV_KEY:-agenttrust-dev-key-$(openssl rand -hex 4)}"
-ADMIN_KEY="${AGENTTRUST_ADMIN_KEY:-agenttrust-admin-key-$(openssl rand -hex 4)}"
+# Admin key is required. Do not invent or print one.
+if [[ -z "${AGENTTRUST_ADMIN_KEY:-}" ]]; then
+  echo "✗ AGENTTRUST_ADMIN_KEY is not set. Refusing to deploy without an admin key." >&2
+  exit 1
+fi
 UPGRADE_URL="${AGENTTRUST_UPGRADE_URL:-https://mcpize.com/agenttrust-mcp}"
 
 echo "→ Setting environment variables"
-railway variables --set "AGENTTRUST_DEV_KEY=$DEV_KEY" || true
-railway variables --set "AGENTTRUST_ADMIN_KEY=$ADMIN_KEY" || true
+if [[ -n "${AGENTTRUST_DEV_KEY:-}" ]]; then
+  railway variables --set "AGENTTRUST_DEV_KEY=${AGENTTRUST_DEV_KEY}" || true
+fi
+railway variables --set "AGENTTRUST_ADMIN_KEY=${AGENTTRUST_ADMIN_KEY}" || true
 railway variables --set "AGENTTRUST_UPGRADE_URL=$UPGRADE_URL" || true
 railway variables --set "AGENTTRUST_DB=/data/agenttrust.db" || true
 
@@ -70,9 +75,8 @@ cat <<EOF
 
 ✓ AgentTrust MCP deployed.
 
-Save these somewhere safe:
-  Dev key   : $DEV_KEY
-  Admin key : $ADMIN_KEY
+API keys were stored as Railway variables. This script does not print them.
+Read AGENTTRUST_DEV_KEY and AGENTTRUST_ADMIN_KEY from the Railway dashboard if you need them.
 
 Sanity check after the URL is live:
   curl https://<your-railway-url>/health
